@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simpson's Instagram</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <section>
+      <header>
+        <img src="images/homer.png" alt="profile image" />
+        <div>
+          <p>Homer</p>
+          <i class="ri-verified-badge-fill"></i>
+        </div>
+      </header>
+      <div class="card">
+        <div id="carousel" class="visual">
+          <img id="card1" src="images/donut.png" alt="donut" />
+          <img id="card2" src="images/forbidden.png" alt="donut" />
+          <img id="card3" src="images/hell.png" alt="donut" />
+
+          <div class="controls">
+            <button
+              id="prev"
+              class="previous"
+              onclick="carousel.scrollBy(-100, 0)"
+            >
+              <i class="ri-arrow-left-circle-fill"></i>
+            </button>
+            <button id="next" class="next" onclick="carousel.scrollBy(100, 0)">
+              <i class="ri-arrow-right-circle-fill"></i>
+            </button>
+          </div>
+
+          <div id="pagination" class="pagination"></div>
+        </div>
+      </div>
+      <div class="social">
+        <div class="inter">
+          <div>
+            <button id="likeButton">
+              <i class="ri-heart-line"></i>
+            </button>
+
+            <button>
+              <i class="ri-chat-3-line"></i>
+            </button>
+            <button>
+              <i class="ri-share-line"></i>
+            </button>
+          </div>
+
+          <button>
+            <i class="ri-bookmark-line"></i>
+          </button>
+        </div>
+
+        <p>3,802 likes</p>
+        <p>
+          Just got the deal of a lifetime! 🍩 Someone actually gave me this
+          amazing, super tasty donut today - all it cost was my soul! 😂 Can you
+          believe it? Munched the whole thing down and then, whoops, off to hell
+          I went. But joke's on them, I got to eat even more down there! 🤣
+          Silly, right? Gotta love those heavenly (or should I say hellish?)
+          treats. 😜 #DonutLife
+        </p>
+        <button id="expandAllComments" class="text-like-button-wrapper">
+          <span class="text-like-button">View all comments</span>
+        </button>
+        <div id="commentsContainer" style="display: none">
+          <p class="comment">
+            <span class="comment-name">Marge</span> Next time, just ask me to
+            bake some. Let's keep our afterlife plans more... traditional. 💙🍩
+          </p>
+          <br />
+          <p class="comment">
+            <span class="comment-name">Bart</span> Yo, old man sold his soul for
+            a donut? Classic! Next time, make a deal for unlimited skateboards.
+            😂 #DoTheBartman #SoulForSnacks
+          </p>
+          <br />
+          <p class="comment">
+            <span class="comment-name">Ned Flanders</span> Neighborino, tempting
+            your soul with transitory delights? Let's have a chat about the
+            eternal, and maybe some non-demonically exchanged donuts, okily
+            dokily? 🙏🍩 #HeavenlyDonuts
+          </p>
+        </div>
+      </div>
+      <div id="commentModal" class="modal-overlay" style="display: none">
+        <div class="modal-content">
+          <input id="userName" type="text" placeholder="Your name" />
+          <textarea id="userComment" placeholder="Your comment"></textarea>
+          <button id="submitComment">Submit Comment</button>
+        </div>
+      </div>
+      <div id="shareModal" class="modal-overlay" style="display: none">
+        <div class="modal-content" style="text-align: center">
+          URL is copied, ready to share.
+        </div>
+      </div>
+    </section>
+    <script>
+      const images = document.querySelectorAll("#carousel img");
+      const pagination = document.querySelector("#pagination");
+      const expandAllCommentsButton =
+        document.getElementById("expandAllComments");
+      const commentsContainer = document.getElementById("commentsContainer");
+      const comments = document.querySelectorAll(".comment");
+
+      function createPaginationMarkers() {
+        images.forEach((img) => {
+          const imgViewName = `--${img.id}`;
+          img.style.viewTimelineName = imgViewName;
+          const marker = document.createElement("button");
+          marker.type = "button";
+          marker.role = "tab";
+          marker.style.animationTimeline = imgViewName;
+          marker.addEventListener("click", () =>
+            img.scrollIntoView({
+              behavior: "smooth",
+              block: "nearest",
+              inline: "start",
+            })
+          );
+          pagination.appendChild(marker);
+        });
+
+        document.body.style.timelineScope = `${Array.from(images).map(
+          (image) => image.style.viewTimelineName
+        )}`;
+      }
+
+      // Check browser support for Scroll-driven Animations
+      if (CSS.supports("view-timeline-axis", "inline")) {
+        createPaginationMarkers();
+      }
+
+      // Start scrolling from the second image
+      carousel.scrollBy(100, 0);
+
+      // Set initial text for comments button
+      expandAllCommentsButton.querySelector(
+        ".text-like-button"
+      ).textContent = `View all ${comments.length} comments`;
+
+      expandAllCommentsButton.addEventListener("click", function () {
+        const isCommentsVisible = commentsContainer.style.display !== "none";
+
+        commentsContainer.style.display = isCommentsVisible ? "none" : "block";
+        expandAllCommentsButton.querySelector(".text-like-button").textContent =
+          isCommentsVisible
+            ? `View all ${comments.length} comments`
+            : "Fold all comments";
+      });
+      // 获取评论按钮和模态框元素
+      const commentButton =
+        document.querySelector(".ri-chat-3-line").parentNode;
+      const commentModal = document.getElementById("commentModal");
+      const submitCommentButton = document.getElementById("submitComment");
+      const userNameInput = document.getElementById("userName");
+      const userCommentTextarea = document.getElementById("userComment");
+
+      // 显示模态框的函数
+      function showModal() {
+        commentModal.style.display = "flex";
+      }
+
+      // 隐藏模态框的函数
+      function hideModal() {
+        commentModal.style.display = "none";
+        userNameInput.value = ""; // 清空输入
+        userCommentTextarea.value = ""; // 清空输入
+      }
+
+      // 点击评论按钮时显示模态框
+      commentButton.addEventListener("click", showModal);
+
+      // 提交评论
+      submitCommentButton.addEventListener("click", function () {
+        const userName = userNameInput.value.trim();
+        const userComment = userCommentTextarea.value.trim();
+        if (userName && userComment) {
+          // 创建新评论元素
+          const newComment = document.createElement("p");
+          newComment.classList.add("comment");
+          newComment.innerHTML = `<span class="comment-name">${userName}</span> ${userComment}`;
+          commentsContainer.appendChild(newComment); // 添加到评论容器
+          hideModal(); // 隐藏模态框
+          commentsContainer.style.display = "block"; // 确保评论区是可见的
+        } else {
+          alert("Please fill in both fields."); // 简单的验证和反馈
+        }
+      });
+
+      // 点击模态框外部时隐藏模态框
+      commentModal.addEventListener("click", function (event) {
+        if (event.target === commentModal) {
+          hideModal();
+        }
+      });
+      document.addEventListener("DOMContentLoaded", function () {
+        const likeButton = document.getElementById("likeButton");
+        likeButton.addEventListener("click", function () {
+          // 切换爱心图标的颜色
+          likeButton.classList.toggle("liked");
+
+          // 切换图标样式从实线到空心，或反之
+          const icon = likeButton.querySelector("i");
+          if (icon.classList.contains("ri-heart-line")) {
+            icon.classList.remove("ri-heart-line");
+            icon.classList.add("ri-heart-fill");
+          } else {
+            icon.classList.remove("ri-heart-fill");
+            icon.classList.add("ri-heart-line");
+          }
+        });
+      });
+      document.addEventListener("DOMContentLoaded", function () {
+        const shareButton = document.querySelector(".ri-share-line").parentNode; // 假设分享按钮已正确标记
+        const shareModal = document.getElementById("shareModal");
+
+        shareButton.addEventListener("click", function () {
+          // 复制当前页面的URL
+          navigator.clipboard
+            .writeText(window.location.href)
+            .then(() => {
+              // 显示模态框
+              shareModal.style.display = "flex";
+
+              // 两秒后隐藏模态框
+              setTimeout(() => {
+                shareModal.style.display = "none";
+              }, 2000);
+            })
+            .catch((err) => {
+              console.error("Failed to copy: ", err);
+            });
+        });
+      });
+      document.addEventListener("DOMContentLoaded", function () {
+        // 查找所有包含话题标签文本的元素
+        document.querySelectorAll(".social p").forEach((p) => {
+          // 使用正则表达式查找话题标签，假设话题标签格式为 #后跟文字
+          p.innerHTML = p.innerHTML.replace(
+            /#(\w+)/g,
+            '<span class="hashtag">#$1</span>'
+          );
+        });
+      });
+    </script>
+  </body>
+</html>
